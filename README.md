@@ -1,21 +1,66 @@
-The repo. contains the OpenWRT SDK files for building hostapd with the MANA patches made by Sensepost
-It also contains the binary installation files, to install it on your Pineapple NANO + TETRA.
+hostapd MANA - Pineapple NANO+TETRA
+===================================
+hostapd-mana patches by Dominic White (singe) & Ian de Villiers @ sensepost (research@sensepost.com)  
+ported to openwrt by: Andreas Nilsen @adde88
 
-Dependencies: libubus, tinyproxy, stunnel, ip
+Last Update: 17.09.2016
+-----------------------
+This is under development!  
+Because of that the startup-script is currently stripped. (read below for more info)  
+Updates are coming, as the goal is to get MANA-toolkit available from your pocket. 
+
+Yours truly, Andreas Nilsen. - @adde88
+
+
+Overview
+--------
+A access point (evilAP) first presented at Defcon 22.  
+
+More specifically, it contains the improvements to the KARMA attacks we implemented into hostapd, as well as the ability to rogue EAP access points.  
+
+Thanks to TarlogicSecurity who made the hostapd-wpe patches for OpenWRT, and inspired me to get the MANA patches running on OpenWRT.  
+
+This will attempt to track the hostapd-mana releases from Sensepost.
+
+Contents
+--------
+It contains:
+* hostapd-mana - modified hostapd that implements our new karma attacks
+* crackapd - a tool for offloading the cracking of EAP creds to an external tool and re-adding them to the hostapd EAP config (auto crack 'n add)
+* sslstrip2 & dns2proxy
+* net-creds
+* firelamb
+
+Dependencies
+------------
+Dependencies: libubus, tinyproxy, stunnel, ip   
 (You should run: "opkg update" before installing.)
 
-Just install both IPK files located within the folder ./bin/ar71xx/packages/base/
-hostapd-mana_2016-09-16_ar71xx.ipk
+
+Installation
+------------
+Install both IPK files located within the folder ./bin/ar71xx/packages/base/  
+hostapd-mana_2016-09-16_ar71xx.ipk  
 asleap_2.2-1_ar71xx.ipk
 
-Everything will be installed to the usual folders:
-/usr/share/mana-toolkit/
-/etc/mana-toolkit/
+Everything will be installed to your usual folders:  
+/usr/share/mana-toolkit/  
+/etc/mana-toolkit/  
 /var/lib/mana-toolkit/
 
-The current startup-script: /usr/share/mana-toolkit/run-mana/mana-pineapple.sh
-It is currently stripped a bit for dev. reasons. It gets hostapd-mana up and running with a DHCP server, while forwarding traffic between br-lan - wlan1.
-SSLstrip, SSLsplit, dns2proxy, crackapd.py, asleap is NOT started. (But should run in theory.)
 
-Stay tuned for updates, as the goal is to get all parts of MANA toolkit running from your pocket.
-Yours truly, Andreas Nilsen. - @adde88
+Running
+-------
+The current startup-script: /usr/share/mana-toolkit/run-mana/mana-pineapple.sh  
+It is currently stripped a bit because of dev. reasons.  
+It gets hostapd-mana up and running with a DHCP server, while forwarding traffic between br-lan - wlan1. (NAT-mode)  
+SSLstrip, SSLsplit, dns2proxy, crackapd.py, asleap is NOT started. (But they should run in theory.)
+
+
+License
+-------
+The patches included in hostapd-mana by SensePost are licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (http://creativecommons.org/licenses/by-sa/4.0/) Permissions beyond the scope of this license may be available at http://sensepost.com/contact us/. hostapd's code retains it's original license available in COPYING.
+
+
+
+
