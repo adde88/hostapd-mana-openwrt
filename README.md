@@ -5,11 +5,11 @@ ported to openwrt by: Andreas Nilsen @adde88
 
 Last Update: 02.10.2016
 -----------------------
-To solve the issues that currently exists on the Pineapples regarding outdated python-libraries.
-I have uploaded a copy of my /usr/lib/python2.7 folder.
-The file is: python2.7.tar.gz
-The contents of that file needs to be extracted into your /usr/lib/python2.7 folder, if you want to run SSLstrip+ on the Pineapple.
-
+To solve the issues that currently exists on the Pineapples regarding outdated python-libraries.  
+I have uploaded a copy of my /usr/lib/python2.7 folder.  
+The file is: python2.7.tar.gz  
+The contents of that file needs to be extracted into your /usr/lib/python2.7 folder, if you want to run SSLstrip+ on the Pineapple.  
+  
 I'll update this with an easier way, when i get time.
 
 Yours truly, Andreas Nilsen. - @adde88
