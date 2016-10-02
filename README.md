@@ -3,11 +3,14 @@ hostapd MANA - Pineapple NANO+TETRA
 hostapd-mana patches by Dominic White (singe) & Ian de Villiers @ sensepost (research@sensepost.com)  
 ported to openwrt by: Andreas Nilsen @adde88
 
-Last Update: 17.09.2016
+Last Update: 02.10.2016
 -----------------------
-This is under development!  
-Because of that the startup-script is currently stripped. (read below for more info)  
-Updates are coming, as the goal is to get MANA-toolkit available from your pocket. 
+To solve the issues that currently exists on the Pineapples regarding outdated python-libraries.
+I have uploaded a copy of my /usr/lib/python2.7 folder.
+The file is: python2.7.tar.gz
+The contents of that file needs to be extracted into your /usr/lib/python2.7 folder, if you want to run SSLstrip+ on the Pineapple.
+
+I'll update this with an easier way, when i get time.
 
 Yours truly, Andreas Nilsen. - @adde88
 
