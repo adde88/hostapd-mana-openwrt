@@ -24,7 +24,7 @@ endchoice
 config WPA_RFKILL_SUPPORT
 	bool "Add rfkill support"
 	depends on PACKAGE_wpa-supplicant || PACKAGE_wpa-supplicant-mini || PACKAGE_wpad || PACKAGE_wpad-mini
-	default n
+	default y
 
 config WPA_MSG_MIN_PRIORITY
 	int "Minimum debug message priority"

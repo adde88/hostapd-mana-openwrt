@@ -8,13 +8,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
-PKG_VERSION:=2016-09-16
+PKG_VERSION:=2016-10-26
 
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana
-PKG_SOURCE:=$(PKG_NAME).tar.gz
-PKG_SOURCE_VERSION:=HEAD
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)
+PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
+PKG_SOURCE_VERSION:=fe4135f81b69230f0fa6aef2a966bcab92642540
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>, Original hostapd package: Felix Fietkau <nbd@openwrt.org>
 
@@ -49,8 +50,6 @@ ifeq ($(LOCAL_TYPE),supplicant)
 		CONFIG_WPA_SUPPLICANT_OPENSSL
   endif
 endif
-
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -94,7 +93,7 @@ define Package/hostapd-mana/Default
   SECTION:=net
   CATEGORY:=Network
   TITLE:=IEEE 802.1x Authenticator with support for the MANA and Karma attacks.
-  DEPENDS:=$(DRV_DEPENDS) +libubus +tinyproxy +stunnel +ip
+  DEPENDS:=$(DRV_DEPENDS) +libubus +tinyproxy +stunnel +ip +python
 endef
 
 define Package/hostapd-mana
@@ -162,8 +161,8 @@ define Build/Compile/hostapd
 endef
 
 define Build/Compile
-	echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> LOCAL TYPE = $(LOCAL_TYPE)"
-	echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> BUILD VARIANT = $(BUILD_VARIANT)"
+	echo "LOCAL TYPE: $(LOCAL_TYPE)"
+	echo "BUILD VARIANT: $(BUILD_VARIANT)"
 	$(Build/Compile/hostapd)
 	$(Build/Compile/full)
 endef
@@ -248,13 +247,14 @@ define Install/hostapd-mana
 	$(INSTALL_DIR) $(1)/var/lib/mana-toolkit/
 	$(INSTALL_DIR) $(1)/var/lib/mana-toolkit/lamb_braai/
 	$(INSTALL_DIR) $(1)/var/lib/mana-toolkit/sslsplit/
+	$(INSTALL_DIR) $(1)/usr/lib/python2.7/
 endef
 
 define Package/hostapd-mana/install
 	$(call Install/hostapd-mana,$(1))
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/hostapd/hostapd $(1)/usr/sbin/hostapd-mana
-	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/conf/,$(config_files)) $(1)/etc/mana-toolkit/
-	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/cert/,$(cert_config_files)) $(1)/usr/share/mana-toolkit/cert/
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd $(1)/usr/sbin/hostapd-mana
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/* $(1)/etc/mana-toolkit/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/* $(1)/usr/share/mana-toolkit/cert/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/,$(mana_start_scripts)) $(1)/usr/share/mana-toolkit/run-mana/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/crackapd/,$(crackapd_files)) $(1)/usr/share/mana-toolkit/crackapd/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/firelamb/,$(firelamb_files)) $(1)/usr/share/mana-toolkit/firelamb/
@@ -262,6 +262,7 @@ define Package/hostapd-mana/install
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/sslstrip-hsts/sslstrip2/,$(sslstrip_files)) $(1)/usr/share/mana-toolkit/sslstrip-hsts/sslstrip2/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/sslstrip-hsts/sslstrip2/sslstrip/,$(sslstrip_files2)) $(1)/usr/share/mana-toolkit/sslstrip-hsts/sslstrip2/sslstrip/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/sslstrip-hsts/dns2proxy/,$(dns2proxy_files)) $(1)/usr/share/mana-toolkit/sslstrip-hsts/dns2proxy/
+	cp -r $(PKG_BUILD_DIR)/python2.7/* $(1)/usr/lib/python2.7/
 endef
 
 $(eval $(call BuildPackage,hostapd-mana))
