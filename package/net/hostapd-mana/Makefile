@@ -8,13 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
-PKG_VERSION:=2016-10-26
+PKG_VERSION:=2016-11-05
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_SOURCE_VERSION:=fe4135f81b69230f0fa6aef2a966bcab92642540
+PKG_SOURCE_VERSION:=c0e421868d87cd0c9814512b79a5840789b78acf
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>, Original hostapd package: Felix Fietkau <nbd@openwrt.org>
