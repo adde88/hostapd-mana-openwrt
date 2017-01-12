@@ -7,7 +7,8 @@ Last Update: 12.01.2017
 -----------------------
 New improved launch script!  
 Simply type 'launch-mana' (without the quotes) to start the attack.  
-More to come... :)  
+More to come... :)   
+
 Yours truly, Andreas Nilsen. - @adde88
 
 
