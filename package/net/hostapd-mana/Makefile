@@ -8,13 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
-PKG_VERSION:=2016-11-05
+PKG_VERSION:=2017-01-12
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_SOURCE_VERSION:=c0e421868d87cd0c9814512b79a5840789b78acf
+PKG_SOURCE_VERSION:=HEAD
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>, Original hostapd package: Felix Fietkau <nbd@openwrt.org>
@@ -121,7 +121,7 @@ define Build/Configure
 	$(if $(wildcard ./files/hostapd-$(LOCAL_VARIANT).config), \
 		$(CP) ./files/hostapd-$(LOCAL_VARIANT).config $(PKG_BUILD_DIR)/hostapd/.config \
 	)
-	#$(CP) ./files/wpa_supplicant-$(LOCAL_VARIANT).config $(PKG_BUILD_DIR)/wpa_supplicant/.config
+	#$(CP) ./files/wpa_supplicant-$(LOCAL_VARIANT).config $(PKG_BUILD_DIR)/wpa_supplicant/.config 		# NOT NEEDED FOR THE MANA-TOOLKIT
 endef
 
 TARGET_CPPFLAGS := \
@@ -196,8 +196,11 @@ mana_start_scripts=	firelamb-view.sh \
 					mana-pineapple.sh
 
 crackapd_files=	crackapd.conf crackapd.py
+
 firelamb_files=	firelamb.py helper.py publicsuffix.py publicsuffix.txt quick-run-stats.sh README
+
 net-creds_files= LICENSE net-creds.py README.md requirements.txt
+
 sslstrip_files=	COPYING \
 				debug_ssl.log \
 				lock.ico \
@@ -207,6 +210,7 @@ sslstrip_files=	COPYING \
 				setup.py \
 				sslstrip.log \
 				sslstrip.py
+
 sslstrip_files2=	ClientRequest.py \
 					CookieCleaner.py \
 					DnsCache.py \
@@ -216,6 +220,7 @@ sslstrip_files2=	ClientRequest.py \
 					SSLServerConnection.py \
 					StrippingProxy.py \
 					URLMonitor.py
+
 dns2proxy_files=	dns2proxy.py \
 					dnsalert.txt \
 					dnslog.txt \
@@ -253,9 +258,10 @@ endef
 define Package/hostapd-mana/install
 	$(call Install/hostapd-mana,$(1))
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd $(1)/usr/sbin/hostapd-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/mana-pineapple.sh $(1)/usr/sbin/launch-mana
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/* $(1)/etc/mana-toolkit/
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/* $(1)/usr/share/mana-toolkit/cert/
-	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/,$(mana_start_scripts)) $(1)/usr/share/mana-toolkit/run-mana/
+	$(INSTALL_BIN) $(addprefix $(PKG_BUILD_DIR)/files/,$(mana_start_scripts)) $(1)/usr/share/mana-toolkit/run-mana/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/crackapd/,$(crackapd_files)) $(1)/usr/share/mana-toolkit/crackapd/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/firelamb/,$(firelamb_files)) $(1)/usr/share/mana-toolkit/firelamb/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/net-creds/,$(net-creds_files)) $(1)/usr/share/mana-toolkit/net-creds/
