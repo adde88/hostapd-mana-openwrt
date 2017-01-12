@@ -6,7 +6,7 @@ ported to openwrt by: Andreas Nilsen @adde88
 Last Update: 12.01.2017
 -----------------------
 New improved launch script!
-Simply type 'launch-mana' (without the quotes) to start the attack.
+Simply type 'launch-mana' (without the quotes) to start the attack. 
 More to come... :) 
 Yours truly, Andreas Nilsen. - @adde88
 
