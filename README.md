@@ -7,7 +7,7 @@ Last Update: 13.01.2017
 -----------------------
 Installation script in place. Type this to install mana-toolkit for the Pineapple:  
 ```bash
-wget -qO- https://raw.githubusercontent.com/adde88/hostapd-mana/master/INSTALL.sh | bash -s -- -v -v  
+wget -qO- https://raw.githubusercontent.com/adde88/hostapd-mana/master/INSTALL.sh | bash -s -- -v -v
 ```
   
 Also:  
