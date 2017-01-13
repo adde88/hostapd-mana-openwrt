@@ -1,10 +1,14 @@
-hostapd MANA - Pineapple NANO+TETRA
+hostapd-mana @ Pineapple NANO + TETRA / OpenWRT
 ===================================
 hostapd-mana patches by Dominic White (singe) & Ian de Villiers @ sensepost (research@sensepost.com)  
-ported to openwrt by: Andreas Nilsen @adde88
+ported to OpenWRT by: Andreas Nilsen @adde88
 
-Last Update: 12.01.2017
+Last Update: 13.01.2017
 -----------------------
+Installation script in place. Type this to install mana-toolkit for the Pineapple:  
+curl https://raw.githubusercontent.com/adde88/hostapd-mana/master/INSTALL.sh | bash -s  
+  
+Also:  
 New improved launch script!  
 Simply type 'launch-mana' (without the quotes) to start the attack.  
 More to come... :)   
