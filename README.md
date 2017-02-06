@@ -47,7 +47,7 @@ Dependencies: libubus, tinyproxy, stunnel, ip
 Installation
 ------------
 Install both IPK files located within the folder ./bin/ar71xx/packages/base/  
-hostapd-mana_2016-09-16_ar71xx.ipk  
+hostapd-mana_2.6-1_ar71xx.ipk  
 asleap_2.2-1_ar71xx.ipk
 
 Everything will be installed to your usual folders:  
