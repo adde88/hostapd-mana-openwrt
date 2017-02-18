@@ -259,6 +259,7 @@ endef
 define Package/hostapd-mana/install
 	$(call Install/hostapd-mana,$(1))
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd $(1)/usr/sbin/hostapd-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd_cli $(1)/usr/sbin/hostapd-mana_cli
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/mana-pineapple.sh $(1)/usr/sbin/launch-mana
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/* $(1)/etc/mana-toolkit/
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/* $(1)/usr/share/mana-toolkit/cert/
