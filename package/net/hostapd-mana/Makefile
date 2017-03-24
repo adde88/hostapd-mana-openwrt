@@ -94,7 +94,7 @@ define Package/hostapd-mana/Default
   SECTION:=net
   CATEGORY:=Network
   TITLE:=IEEE 802.1x Authenticator with support for the MANA and Karma attacks.
-  DEPENDS:=$(DRV_DEPENDS) +libubus +tinyproxy +stunnel +ip +python +sslsplit
+  DEPENDS:=$(DRV_DEPENDS) +libubus +tinyproxy +stunnel +ip +python +sslsplit +coreutils-stty
 endef
 
 define Package/hostapd-mana
