@@ -194,7 +194,8 @@ cert_config_files=	dhparam.pem \
 					rogue-ca.pem
 
 mana_start_scripts=	firelamb-view.sh \
-					mana-pineapple.sh
+					launch-mana.sh \
+					kill-mana.sh
 
 crackapd_files=	crackapd.conf crackapd.py
 
