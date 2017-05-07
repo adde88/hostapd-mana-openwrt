@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
 PKG_VERSION:=2.6
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
@@ -94,7 +94,7 @@ define Package/hostapd-mana/Default
   SECTION:=net
   CATEGORY:=Network
   TITLE:=IEEE 802.1x Authenticator with support for the MANA and Karma attacks.
-  DEPENDS:=$(DRV_DEPENDS) +libubus +tinyproxy +stunnel +ip +python +sslsplit +coreutils-stty
+  DEPENDS:=$(DRV_DEPENDS) +libubus +tinyproxy +stunnel +ip +python +sslsplit
 endef
 
 define Package/hostapd-mana
@@ -260,7 +260,8 @@ define Package/hostapd-mana/install
 	$(call Install/hostapd-mana,$(1))
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd $(1)/usr/sbin/hostapd-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd_cli $(1)/usr/sbin/mana_cli
-	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/mana-pineapple.sh $(1)/usr/sbin/launch-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/launch-mana.sh $(1)/usr/sbin/launch-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/kill-mana.sh $(1)/usr/sbin/kill-mana
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/* $(1)/etc/mana-toolkit/
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/* $(1)/usr/share/mana-toolkit/cert/
 	$(INSTALL_BIN) $(addprefix $(PKG_BUILD_DIR)/files/,$(mana_start_scripts)) $(1)/usr/share/mana-toolkit/run-mana/
