@@ -3,9 +3,9 @@ hostapd-mana 2.6 @ Pineapple NANO + TETRA / OpenWRT
 hostapd-mana patches by Dominic White (singe) & Ian de Villiers @ sensepost (research@sensepost.com)  
 ported to OpenWRT by: Andreas Nilsen @adde88
 
-Last Update: 06.02.2017
+Last Update: 06.01.2018
 -----------------------
-Updated to use hostapd v2.6 with MANA patches!
+Updated to work properly with the latest FW updates to the WiFi Pineapples!
 Type this to install mana-toolkit for the Pineapple:  
 ```bash
 wget -qO- https://raw.githubusercontent.com/adde88/hostapd-mana/master/INSTALL.sh | bash -s -- -v -v
@@ -40,29 +40,20 @@ It contains:
 
 Dependencies
 ------------
-Dependencies: libubus, tinyproxy, stunnel, ip   
+Dependencies: libubus, tinyproxy, stunnel, ip, python, openssl   
 (You should run: "opkg update" before installing.)
 
 
 Installation
 ------------
 Install both IPK files located within the folder ./bin/ar71xx/packages/base/  
-hostapd-mana_2.6-1_ar71xx.ipk  
+hostapd-mana_2.6-5_ar71xx.ipk  
 asleap_2.2-1_ar71xx.ipk
 
 Everything will be installed to your usual folders:  
 /usr/share/mana-toolkit/  
 /etc/mana-toolkit/  
 /var/lib/mana-toolkit/
-
-
-Running
--------
-The current startup-script: /usr/share/mana-toolkit/run-mana/mana-pineapple.sh  
-It is currently stripped a bit because of dev. reasons.  
-It gets hostapd-mana up and running with a DHCP server, while forwarding traffic between br-lan - wlan1. (NAT-mode)  
-SSLstrip, SSLsplit, dns2proxy, crackapd.py, asleap is NOT started. (But they should run in theory.)
-
 
 License
 -------
