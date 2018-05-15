@@ -257,7 +257,7 @@ define Package/hostapd-mana/install
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd $(1)/usr/sbin/hostapd-mana
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/* $(1)/etc/mana-toolkit/
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/* $(1)/usr/share/mana-toolkit/cert/
-	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/,$(mana_start_scripts)) $(1)/usr/share/mana-toolkit/run-mana/
+	$(INSTALL_BIN)  $(addprefix $(PKG_BUILD_DIR)/files/,$(mana_start_scripts)) $(1)/usr/share/mana-toolkit/run-mana/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/crackapd/,$(crackapd_files)) $(1)/usr/share/mana-toolkit/crackapd/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/firelamb/,$(firelamb_files)) $(1)/usr/share/mana-toolkit/firelamb/
 	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/net-creds/,$(net-creds_files)) $(1)/usr/share/mana-toolkit/net-creds/
