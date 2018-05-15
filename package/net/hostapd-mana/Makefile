@@ -8,13 +8,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
-PKG_VERSION:=2016-11-05
+PKG_VERSION:=2018-15-05
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_SOURCE_VERSION:=c0e421868d87cd0c9814512b79a5840789b78acf
+PKG_SOURCE_VERSION:=d638d3f881f7772c83f1131cffe8b031556eadec 
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>, Original hostapd package: Felix Fietkau <nbd@openwrt.org>
@@ -180,7 +180,8 @@ config_files=	dnsmasq-dhcpd.conf \
 				hostapd-mana-eaponly.conf \
 				karmetasploit.rc \
 				stunnel.conf \
-				tinyproxy.conf
+				tinyproxy.conf \
+				hostapd.ssid_filter
 
 cert_config_files=	dhparam.pem \
 					radius.csr \
@@ -193,7 +194,8 @@ cert_config_files=	dhparam.pem \
 					rogue-ca.pem
 
 mana_start_scripts=	firelamb-view.sh \
-					mana-pineapple.sh
+					launch-mana.sh \
+					kill-mana.sh
 
 crackapd_files=	crackapd.conf crackapd.py
 firelamb_files=	firelamb.py helper.py publicsuffix.py publicsuffix.txt quick-run-stats.sh README
