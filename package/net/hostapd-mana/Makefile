@@ -257,6 +257,7 @@ define Package/hostapd-mana/install
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd $(1)/usr/sbin/hostapd-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd_cli $(1)/usr/sbin/mana_cli
 	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/launch-mana.sh $(1)/usr/sbin/launch-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/kill-mana.sh $(1)/usr/sbin/kill-mana
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/* $(1)/etc/mana-toolkit/
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/* $(1)/usr/share/mana-toolkit/cert/
 	$(INSTALL_BIN)  $(addprefix $(PKG_BUILD_DIR)/files/,$(mana_start_scripts)) $(1)/usr/share/mana-toolkit/run-mana/
