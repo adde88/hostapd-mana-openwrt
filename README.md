@@ -1,16 +1,20 @@
-hostapd MANA - Pineapple NANO+TETRA
+hostapd-mana 2.6 @ Pineapple NANO + TETRA / OpenWRT
 ===================================
 hostapd-mana patches by Dominic White (singe) & Ian de Villiers @ sensepost (research@sensepost.com)  
-ported to openwrt by: Andreas Nilsen @adde88
+ported to OpenWRT by: Andreas Nilsen @adde88
 
-Last Update: 02.10.2016
+Last Update: 06.01.2018
 -----------------------
-To solve the issues that currently exists on the Pineapples regarding outdated python-libraries.  
-I have uploaded a copy of my /usr/lib/python2.7 folder.  
-The file is: python2.7.tar.gz  
-The contents of that file needs to be extracted into your /usr/lib/python2.7 folder, if you want to run SSLstrip+ on the Pineapple.  
+Updated to work properly with the latest FW updates to the WiFi Pineapples!
+Type this to install mana-toolkit for the Pineapple:  
+```bash
+wget -qO- https://raw.githubusercontent.com/adde88/hostapd-mana/master/INSTALL.sh | bash -s -- -v -v
+```
   
-I'll update this with an easier way, when i get time.
+Also:  
+New improved launch script!  
+Simply type 'launch-mana' (without the quotes) to start the attack.  
+More to come... :)   
 
 Yours truly, Andreas Nilsen. - @adde88
 
@@ -36,29 +40,20 @@ It contains:
 
 Dependencies
 ------------
-Dependencies: libubus, tinyproxy, stunnel, ip   
+Dependencies: libubus, tinyproxy, stunnel, ip, python, openssl   
 (You should run: "opkg update" before installing.)
 
 
 Installation
 ------------
 Install both IPK files located within the folder ./bin/ar71xx/packages/base/  
-hostapd-mana_2016-09-16_ar71xx.ipk  
+hostapd-mana_2.6-5_ar71xx.ipk  
 asleap_2.2-1_ar71xx.ipk
 
 Everything will be installed to your usual folders:  
 /usr/share/mana-toolkit/  
 /etc/mana-toolkit/  
 /var/lib/mana-toolkit/
-
-
-Running
--------
-The current startup-script: /usr/share/mana-toolkit/run-mana/mana-pineapple.sh  
-It is currently stripped a bit because of dev. reasons.  
-It gets hostapd-mana up and running with a DHCP server, while forwarding traffic between br-lan - wlan1. (NAT-mode)  
-SSLstrip, SSLsplit, dns2proxy, crackapd.py, asleap is NOT started. (But they should run in theory.)
-
 
 License
 -------
