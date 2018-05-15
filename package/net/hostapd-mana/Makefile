@@ -14,7 +14,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_SOURCE_VERSION:=a87a9827da685c48fcc45912f26d79a9f9ea7b59 
+PKG_SOURCE_VERSION:=bd306ecbd486f044b2c7a39367c2266cbc05276d
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>, Original hostapd package: Felix Fietkau <nbd@openwrt.org>
