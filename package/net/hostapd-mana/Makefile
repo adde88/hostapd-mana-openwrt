@@ -8,16 +8,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
-PKG_VERSION:=2018-16-05
+PKG_VERSION:=2018-31-05
+PKG_RELEASE:=2
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_SOURCE_VERSION:=759d02b8835ff44f343b951afd784a9f88ff7235
+PKG_SOURCE_VERSION:=b48a21dc3e570c9a08d5934da94579430b3e8979
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
-PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>, Original hostapd package: Felix Fietkau <nbd@openwrt.org>
+PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>
 
 PKG_BUILD_PARALLEL:=1
 
@@ -166,6 +167,15 @@ define Build/Compile
 	$(Build/Compile/hostapd)
 	$(Build/Compile/full)
 endef
+
+define Package/hostapd-mana/postinst
+#!/bin/sh
+if [ -e $${1}/usr/bin/hostapd-mana ]; then
+  python -m compileall;
+  python -m compileall $${1}/usr/share/mana-toolkit/;
+fi
+endef
+
 
 config_files=	dnsmasq-dhcpd.conf \
 				dnsmasq-dhcpd-two.conf \

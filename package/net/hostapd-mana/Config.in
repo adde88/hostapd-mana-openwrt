@@ -44,7 +44,7 @@ config DRIVER_WEXT_SUPPORT
 
 config DRIVER_11N_SUPPORT
 	bool
-	default n
+	default y
 config CONFIG_TAXONOMY
 	bool
 	default y
