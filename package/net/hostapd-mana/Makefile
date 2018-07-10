@@ -8,14 +8,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
-PKG_VERSION:=2018-31-05
-PKG_RELEASE:=2
+PKG_VERSION:=2.6
+PKG_RELEASE:=8
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_SOURCE_VERSION:=b48a21dc3e570c9a08d5934da94579430b3e8979
+PKG_SOURCE_VERSION:=e335eab75e34361385925f15079d75351b1fb903
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>
@@ -122,6 +122,7 @@ define Build/Configure
 	$(if $(wildcard ./files/hostapd-$(LOCAL_VARIANT).config), \
 		$(CP) ./files/hostapd-$(LOCAL_VARIANT).config $(PKG_BUILD_DIR)/hostapd/.config \
 	)
+	#I'm commenting out wpa_supplicant. As i don't see any scenario where we need it...
 	#$(CP) ./files/wpa_supplicant-$(LOCAL_VARIANT).config $(PKG_BUILD_DIR)/wpa_supplicant/.config
 endef
 
@@ -170,78 +171,21 @@ endef
 
 define Package/hostapd-mana/postinst
 #!/bin/sh
-if [ -e $${1}/usr/bin/hostapd-mana ]; then
-  python -m compileall;
-  python -m compileall $${1}/usr/share/mana-toolkit/;
-fi
+# We need to install some python dependencies...
+echo -e '\nDownloading python-related dependencies...\n'
+sleep 1
+mkdir -p /tmp/mana_dependencies/
+wget -i /etc/mana-toolkit/dependencies.txt -P /tmp/mana_dependencies/ --progress=bar:force:noscroll
+#
+# Let's pre-compile python-files and libraries.
+echo -e '\nPre-compiling python files and libraries...\nThis can take a little while, please be patient...\n'
+python -m compileall;
+python -m compileall $${1}/usr/share/mana-toolkit/;
+#
+echo -e '\nFinished installing hostapd-mana. However, you will not be able to use any python-related tools before installing their dependencies...'
+echo -e '\nThey should already be downloaded.\nTo install them enter the following command: "install-mana-depends"'
+echo -e '\n\n -Zylla   <adde88@gmail.com> '
 endef
-
-
-config_files=	dnsmasq-dhcpd.conf \
-				dnsmasq-dhcpd-two.conf \
-				dnsspoof.conf \
-				hostapd.accept \
-				hostapd.deny \
-				hostapd.eap_user \
-				hostapd-hidden.conf \
-				hostapd-mana.conf \
-				hostapd-mana-all.conf \
-				hostapd-mana-eap.conf \
-				hostapd-mana-eaponly.conf \
-				karmetasploit.rc \
-				stunnel.conf \
-				tinyproxy.conf \
-				hostapd.ssid_filter
-
-cert_config_files=	dhparam.pem \
-					radius.csr \
-					radius.key \
-					radius.pem \
-					rogue-ca.crt \
-					rogue-ca.der \
-					rogue-ca.key \
-					rogue-ca.p12 \
-					rogue-ca.pem
-
-mana_start_scripts=	firelamb-view.sh \
-					launch-mana.sh \
-					kill-mana.sh
-
-crackapd_files=	crackapd.conf crackapd.py
-firelamb_files=	firelamb.py helper.py publicsuffix.py publicsuffix.txt quick-run-stats.sh README
-net-creds_files= LICENSE net-creds.py README.md requirements.txt
-sslstrip_files=	COPYING \
-				debug_ssl.log \
-				lock.ico \
-				poc.log \
-				README \
-				README.md \
-				setup.py \
-				sslstrip.log \
-				sslstrip.py
-sslstrip_files2=	ClientRequest.py \
-					CookieCleaner.py \
-					DnsCache.py \
-					__init__.py \
-					ServerConnection.py \
-					ServerConnectionFactory.py \
-					SSLServerConnection.py \
-					StrippingProxy.py \
-					URLMonitor.py
-dns2proxy_files=	dns2proxy.py \
-					dnsalert.txt \
-					dnslog.txt \
-					domains.cfg \
-					fhtagn.sh \
-					ia.sh \
-					IPBouncer.sh \
-					nospoof.cfg \
-					nospoofto.cfg \
-					README.md \
-					resolv.conf \
-					spoof.cfg \
-					transform.cfg \
-					victims.cfg
 
 define Install/hostapd-mana
 	$(INSTALL_DIR) $(1)/usr/sbin
@@ -253,31 +197,26 @@ define Install/hostapd-mana
 	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/net-creds/
 	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/run-mana/
 	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/sslstrip-hsts/
-	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/sslstrip-hsts/dns2proxy/
-	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/sslstrip-hsts/sslstrip2/
-	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/sslstrip-hsts/sslstrip2/sslstrip
 	$(INSTALL_DIR) $(1)/var/lib/mana-toolkit/
 	$(INSTALL_DIR) $(1)/var/lib/mana-toolkit/lamb_braai/
 	$(INSTALL_DIR) $(1)/var/lib/mana-toolkit/sslsplit/
-	$(INSTALL_DIR) $(1)/usr/lib/python2.7/
 endef
 
 define Package/hostapd-mana/install
 	$(call Install/hostapd-mana,$(1))
-	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd $(1)/usr/sbin/hostapd-mana
-	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd_cli $(1)/usr/sbin/mana_cli
-	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/launch-mana.sh $(1)/usr/sbin/launch-mana
-	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/kill-mana.sh $(1)/usr/sbin/kill-mana
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/* $(1)/etc/mana-toolkit/
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/* $(1)/usr/share/mana-toolkit/cert/
-	$(INSTALL_BIN)  $(addprefix $(PKG_BUILD_DIR)/files/,$(mana_start_scripts)) $(1)/usr/share/mana-toolkit/run-mana/
-	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/crackapd/,$(crackapd_files)) $(1)/usr/share/mana-toolkit/crackapd/
-	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/firelamb/,$(firelamb_files)) $(1)/usr/share/mana-toolkit/firelamb/
-	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/net-creds/,$(net-creds_files)) $(1)/usr/share/mana-toolkit/net-creds/
-	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/sslstrip-hsts/sslstrip2/,$(sslstrip_files)) $(1)/usr/share/mana-toolkit/sslstrip-hsts/sslstrip2/
-	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/sslstrip-hsts/sslstrip2/sslstrip/,$(sslstrip_files2)) $(1)/usr/share/mana-toolkit/sslstrip-hsts/sslstrip2/sslstrip/
-	$(INSTALL_DATA) $(addprefix $(PKG_BUILD_DIR)/files/sslstrip-hsts/dns2proxy/,$(dns2proxy_files)) $(1)/usr/share/mana-toolkit/sslstrip-hsts/dns2proxy/
-	cp -r $(PKG_BUILD_DIR)/python2.7/* $(1)/usr/lib/python2.7/
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd			$(1)/usr/sbin/hostapd-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd_cli		$(1)/usr/sbin/mana_cli
+	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/launch-mana.sh		$(1)/usr/sbin/launch-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/kill-mana.sh			$(1)/usr/sbin/kill-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/firelamb-view.sh		$(1)/usr/share/mana-toolkit/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/*				$(1)/etc/mana-toolkit/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/*				$(1)/usr/share/mana-toolkit/cert/
+	$(CP)			$(PKG_BUILD_DIR)/dependencies.txt			$(1)/etc/mana-toolkit/
+	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/install-mana-depends	$(1)/usr/sbin/install-mana-depends
+	$(CP)			$(PKG_BUILD_DIR)/files/crackapd/			$(1)/usr/share/mana-toolkit/
+	$(CP)			$(PKG_BUILD_DIR)/files/firelamb/			$(1)/usr/share/mana-toolkit/
+	$(CP)			$(PKG_BUILD_DIR)/files/net-creds/			$(1)/usr/share/mana-toolkit/
+	$(CP)			$(PKG_BUILD_DIR)/files/sslstrip-hsts/		$(1)/usr/share/mana-toolkit/
 endef
 
 $(eval $(call BuildPackage,hostapd-mana))
