@@ -207,6 +207,7 @@ define Package/hostapd-mana/install
 	$(call Install/hostapd-mana,$(1))
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd			$(1)/usr/sbin/hostapd-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd_cli		$(1)/usr/sbin/mana_cli
+        $(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/wpa_sycophant            $(1)/usr/sbin/wpa_sycophant
 	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/launch-mana.sh		$(1)/usr/sbin/launch-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/kill-mana.sh			$(1)/usr/sbin/kill-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/firelamb-view.sh		$(1)/usr/share/mana-toolkit/
