@@ -9,13 +9,13 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
 PKG_VERSION:=2.6
-PKG_RELEASE:=14
+PKG_RELEASE:=15
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_SOURCE_VERSION:=d96d49a85bb3f509813ccaf821665c179ad9bbd3
+PKG_SOURCE_VERSION:=8b5e066f93c01a32464256a4110cf2dc3b3ac148
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>
@@ -215,6 +215,7 @@ define Package/hostapd-mana/install
 	$(call Install/hostapd-mana,$(1))
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd		$(1)/usr/sbin/hostapd-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd_cli		$(1)/usr/sbin/mana_cli
+	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/wpa_sycophant.sh		$(1)/usr/sbin/wpa_sycophant.sh
 	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/launch-mana.sh		$(1)/usr/sbin/launch-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/kill-mana.sh		$(1)/usr/sbin/kill-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/firelamb-view.sh		$(1)/usr/share/mana-toolkit/
