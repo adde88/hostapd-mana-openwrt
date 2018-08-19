@@ -9,13 +9,13 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
 PKG_VERSION:=2.6
-PKG_RELEASE:=13
+PKG_RELEASE:=14
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_SOURCE_VERSION:=018ba3f39a0ddf58d0ceff9add56f13e21074790
+PKG_SOURCE_VERSION:=d96d49a85bb3f509813ccaf821665c179ad9bbd3
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>
@@ -172,10 +172,18 @@ endef
 
 define Package/hostapd-mana/postinst
 #!/bin/sh
+# Let's download Sycophant ( I knoow... dirty fix.. Will take A LONG time to fix this properly
+mkdir -p /tmp/mana_dependencies/
+echo -e '\nDownloading Sycopant binary...\n\n'
+if [ -d /sd ]; then
+  wget https://github.com/adde88/hostapd-mana-openwrt/raw/master/bin/ar71xx/packages/base/wpa_sycophant -O /sd/usr/sbin/wpa_sycophant
+else
+  wget https://github.com/adde88/hostapd-mana-openwrt/raw/master/bin/ar71xx/packages/base/wpa_sycophant -O /usr/sbin/wpa_sycophant
+fi
+chmod +x /usr/sbin/wpa_sycophant
 # We need to install some python dependencies...
 echo -e '\nDownloading python-related dependencies...\n'
 sleep 1
-mkdir -p /tmp/mana_dependencies/
 wget -i /etc/mana-toolkit/dependencies.txt -P /tmp/mana_dependencies/ --progress=bar:force:noscroll
 #
 # Let's pre-compile python-files and libraries.
@@ -205,20 +213,19 @@ endef
 
 define Package/hostapd-mana/install
 	$(call Install/hostapd-mana,$(1))
-	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd			$(1)/usr/sbin/hostapd-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd		$(1)/usr/sbin/hostapd-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd_cli		$(1)/usr/sbin/mana_cli
-        $(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/wpa_sycophant            $(1)/usr/sbin/wpa_sycophant
 	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/launch-mana.sh		$(1)/usr/sbin/launch-mana
-	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/kill-mana.sh			$(1)/usr/sbin/kill-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/kill-mana.sh		$(1)/usr/sbin/kill-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/firelamb-view.sh		$(1)/usr/share/mana-toolkit/
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/*				$(1)/etc/mana-toolkit/
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/*				$(1)/usr/share/mana-toolkit/cert/
-	$(CP)			$(PKG_BUILD_DIR)/dependencies.txt			$(1)/etc/mana-toolkit/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/*			$(1)/etc/mana-toolkit/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/*			$(1)/usr/share/mana-toolkit/cert/
+	$(CP)		$(PKG_BUILD_DIR)/dependencies.txt		$(1)/etc/mana-toolkit/
 	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/install-mana-depends	$(1)/usr/sbin/install-mana-depends
-	$(CP)			$(PKG_BUILD_DIR)/files/crackapd/			$(1)/usr/share/mana-toolkit/
-	$(CP)			$(PKG_BUILD_DIR)/files/firelamb/			$(1)/usr/share/mana-toolkit/
-	$(CP)			$(PKG_BUILD_DIR)/files/net-creds/			$(1)/usr/share/mana-toolkit/
-	$(CP)			$(PKG_BUILD_DIR)/files/sslstrip-hsts/		$(1)/usr/share/mana-toolkit/
+	$(CP)		$(PKG_BUILD_DIR)/files/crackapd/		$(1)/usr/share/mana-toolkit/
+	$(CP)		$(PKG_BUILD_DIR)/files/firelamb/		$(1)/usr/share/mana-toolkit/
+	$(CP)		$(PKG_BUILD_DIR)/files/net-creds/		$(1)/usr/share/mana-toolkit/
+	$(CP)		$(PKG_BUILD_DIR)/files/sslstrip-hsts/		$(1)/usr/share/mana-toolkit/
 endef
 
 $(eval $(call BuildPackage,hostapd-mana))
