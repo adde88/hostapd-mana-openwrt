@@ -8,34 +8,31 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
-PKG_VERSION:=2.6
-PKG_RELEASE:=17
+PKG_VERSION:=2.6.5
+PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
+PKG_SOURCE_VERSION:=92cd450f5b8455352310aa7758efcca782b1edad
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_SOURCE_VERSION:=c7f6b525ac870bef656ec56be284cd226ac9ffcf
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+PKG_HASH:=d91b03d0f2b52fa7ec77ec3a87c4738b07544b177e3b68c8c10a8650bac64497
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>
 
 PKG_BUILD_PARALLEL:=1
 
-PKG_BUILD_DEPENDS:= \
-	PACKAGE_kmod-madwifi:madwifi \
-
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_WPA_SUPPLICANT_NO_TIMESTAMP_CHECK \
 	CONFIG_PACKAGE_kmod-ath9k \
-	CONFIG_PACKAGE_kmod-mac80211 \
-	CONFIG_PACKAGE_kmod-madwifi \
+	CONFIG_PACKAGE_kmod-cfg80211 \
 	CONFIG_PACKAGE_hostapd \
 	CONFIG_PACKAGE_hostapd-mini \
 	CONFIG_PACKAGE_kmod-hostap \
-	CONFIG_WPA_RFKILL_SUPPORT \
 	CONFIG_DRIVER_WEXT_SUPPORT \
-	CONFIG_DRIVER_11N_SUPPORT
+	CONFIG_DRIVER_11N_SUPPORT \
+	CONFIG_TAXONOMY
 
 LOCAL_TYPE=$(strip \
 		$(if $(findstring wpad,$(BUILD_VARIANT)),wpad, \
@@ -61,13 +58,14 @@ ifneq ($(CONFIG_DRIVER_11N_SUPPORT),)
 endif
 
 DRIVER_MAKEOPTS= \
-	CONFIG_DRIVER_NL80211=$(CONFIG_PACKAGE_kmod-mac80211) \
-	CONFIG_DRIVER_MADWIFI=$(CONFIG_PACKAGE_kmod-madwifi) \
+	CONFIG_ACS=$(CONFIG_PACKAGE_kmod-cfg80211) \
+	CONFIG_DRIVER_NL80211=$(CONFIG_PACKAGE_kmod-cfg80211) \
 	CONFIG_DRIVER_HOSTAP=$(CONFIG_PACKAGE_kmod-hostap) \
 	CONFIG_IEEE80211N=$(HOSTAPD_IEEE80211N) \
-	CONFIG_IEEE80211W=$(CONFIG_PACKAGE_kmod-ath9k) \
+	CONFIG_IEEE80211W=$(CONFIG_DRIVER_11W_SUPPORT) \
 	CONFIG_DRIVER_WEXT=$(CONFIG_DRIVER_WEXT_SUPPORT) \
-	$(if $(CONFIG_WPA_RFKILL_SUPPORT),NEED_RFKILL=y)
+	CONFIG_TAXONOMY=$(CONFIG_TAXONOMY) \
+	$(if $(CONFIG_WPA_RFKILL_SUPPORT),NEED_RFKILL=y) \
 
 ifneq ($(LOCAL_TYPE),hostapd)
   ifdef CONFIG_WPA_SUPPLICANT_OPENSSL
@@ -88,13 +86,13 @@ ifdef CONFIG_USE_EGLIBC
   TARGET_LDFLAGS_C += -lrt
 endif
 
-DRV_DEPENDS:=+PACKAGE_kmod-mac80211:libnl-tiny @(!TARGET_avr32||BROKEN)
+DRV_DEPENDS:=+PACKAGE_kmod-cfg80211:libnl-tiny @(!TARGET_avr32||BROKEN)
 
 define Package/hostapd-mana/Default
   SECTION:=net
   CATEGORY:=Network
   TITLE:=IEEE 802.1x Authenticator with support for the MANA and Karma attacks.
-  DEPENDS:=$(DRV_DEPENDS) +libubus +tinyproxy +stunnel +ip +python +sslsplit
+  DEPENDS:=$(DRV_DEPENDS) +libubus
 endef
 
 define Package/hostapd-mana
@@ -130,7 +128,6 @@ TARGET_CPPFLAGS := \
 	-I$(STAGING_DIR)/usr/include/libnl-tiny \
 	-I$(PKG_BUILD_DIR)/src/crypto \
 	$(TARGET_CPPFLAGS) \
-	-I$(CURDIR)/madwifi \
 	-DCONFIG_LIBNL20 \
 	-D_GNU_SOURCE \
 	$(if $(CONFIG_WPA_MSG_MIN_PRIORITY),-DCONFIG_MSG_MIN_PRIORITY=$(CONFIG_WPA_MSG_MIN_PRIORITY))
@@ -142,23 +139,24 @@ ifeq ($(findstring supplicant,$(BUILD_VARIANT)),)
   TARGET_LDFLAGS += -lubox -lubus
 endif
 
-ifdef CONFIG_PACKAGE_kmod-mac80211
+ifdef CONFIG_PACKAGE_kmod-cfg80211
   TARGET_LDFLAGS += -lm -lnl-tiny
 endif
 
 define Build/RunMake
-	CFLAGS="$(TARGET_CPPFLAGS) $(TARGET_CFLAGS)" \
-	$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)/$(1) \
- 		$(TARGET_CONFIGURE_OPTS) \
-		$(DRIVER_MAKEOPTS) \
-		LIBS="$(TARGET_LDFLAGS)" \
-		LIBS_c="$(TARGET_LDFLAGS_C)" \
-		BCHECK= \
-		$(2)
+        CFLAGS="$(TARGET_CPPFLAGS) $(TARGET_CFLAGS)" \
+        $(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)/$(1) \
+                $(TARGET_CONFIGURE_OPTS) \
+                $(DRIVER_MAKEOPTS) \
+                LIBS="$(TARGET_LDFLAGS)" \
+                LIBS_c="$(TARGET_LDFLAGS_C)" \
+                AR="$(TARGET_CROSS)gcc-ar" \
+                BCHECK= \
+                $(2)
 endef
 
 define Build/Compile/hostapd
-	$(call Build/RunMake,hostapd, \
+	+$(call Build/RunMake,hostapd, \
 		hostapd hostapd_cli \
 	)
 endef
@@ -170,45 +168,11 @@ define Build/Compile
 	$(Build/Compile/full)
 endef
 
-define Package/hostapd-mana/postinst
-#!/bin/sh
-# Let's download Sycophant ( I knoow... dirty fix.. Will take A LONG time to fix this properly
-mkdir -p /tmp/mana_dependencies/
-echo -e '\nDownloading Sycopant binary...\n\n'
-if [ -d /sd ]; then
-  wget https://github.com/adde88/hostapd-mana-openwrt/raw/master/bin/ar71xx/packages/base/wpa_sycophant -O /sd/usr/sbin/wpa_sycophant
-else
-  wget https://github.com/adde88/hostapd-mana-openwrt/raw/master/bin/ar71xx/packages/base/wpa_sycophant -O /usr/sbin/wpa_sycophant
-fi
-chmod +x /usr/sbin/wpa_sycophant
-# We need to install some python dependencies...
-echo -e '\nDownloading python-related dependencies...\n'
-sleep 1
-wget -i /etc/mana-toolkit/dependencies.txt -P /tmp/mana_dependencies/ --progress=bar:force:noscroll
-#
-# Let's pre-compile python-files and libraries.
-echo -e '\nPre-compiling python files and libraries...\nThis can take a little while, please be patient...\n'
-python -m compileall;
-python -m compileall $${1}/usr/share/mana-toolkit/;
-#
-echo -e '\nFinished installing hostapd-mana. However, you will not be able to use any python-related tools before installing their dependencies...'
-echo -e '\nThey should already be downloaded.\nTo install them enter the following command: "install-mana-depends"'
-echo -e '\n\n -Zylla   <adde88@gmail.com> '
-endef
-
 define Install/hostapd-mana
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_DIR) $(1)/etc/mana-toolkit/
 	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/
 	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/cert/
-	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/crackapd/
-	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/firelamb/
-	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/net-creds/
-	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/run-mana/
-	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/sslstrip-hsts/
-	$(INSTALL_DIR) $(1)/var/lib/mana-toolkit/
-	$(INSTALL_DIR) $(1)/var/lib/mana-toolkit/lamb_braai/
-	$(INSTALL_DIR) $(1)/var/lib/mana-toolkit/sslsplit/
 endef
 
 define Package/hostapd-mana/install
@@ -218,15 +182,10 @@ define Package/hostapd-mana/install
 	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/wpa_sycophant.sh		$(1)/usr/sbin/wpa_sycophant.sh
 	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/launch-mana.sh		$(1)/usr/sbin/launch-mana
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/kill-mana.sh		$(1)/usr/sbin/kill-mana
-	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/firelamb-view.sh		$(1)/usr/share/mana-toolkit/
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/*			$(1)/etc/mana-toolkit/
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/*			$(1)/usr/share/mana-toolkit/cert/
 	$(CP)		$(PKG_BUILD_DIR)/dependencies.txt		$(1)/etc/mana-toolkit/
 	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/install-mana-depends	$(1)/usr/sbin/install-mana-depends
-	$(CP)		$(PKG_BUILD_DIR)/files/crackapd/		$(1)/usr/share/mana-toolkit/
-	$(CP)		$(PKG_BUILD_DIR)/files/firelamb/		$(1)/usr/share/mana-toolkit/
-	$(CP)		$(PKG_BUILD_DIR)/files/net-creds/		$(1)/usr/share/mana-toolkit/
-	$(CP)		$(PKG_BUILD_DIR)/files/sslstrip-hsts/		$(1)/usr/share/mana-toolkit/
 endef
 
 $(eval $(call BuildPackage,hostapd-mana))

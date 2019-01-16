@@ -46,14 +46,11 @@ config DRIVER_11N_SUPPORT
 	bool
 	default y
 
-config CONFIG_TAXONOMY
+config TAXONOMY
 	bool
 	default y
 
-config CONFIG_MBO
-	bool
-	default y
+config DRIVER_11W_SUPPORT
+        bool
+        default n
 
-config CONFIG_ACS
-	bool
-	default y
