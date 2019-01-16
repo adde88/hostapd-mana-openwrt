@@ -9,15 +9,15 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
 PKG_VERSION:=2.6.5
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
-PKG_SOURCE_VERSION:=92cd450f5b8455352310aa7758efcca782b1edad
+PKG_SOURCE_VERSION:=a07c7ba0ac646d06d2a74795833fd83e57c129ab
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_HASH:=d91b03d0f2b52fa7ec77ec3a87c4738b07544b177e3b68c8c10a8650bac64497
+PKG_HASH:=57250d23c10bb2fb81c559379b81e1b3f0a85adcfcfd10d34f31cb93bd0faac5
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>
 
@@ -87,6 +87,10 @@ ifdef CONFIG_USE_EGLIBC
 endif
 
 DRV_DEPENDS:=+PACKAGE_kmod-cfg80211:libnl-tiny @(!TARGET_avr32||BROKEN)
+
+define Package/hostapd-mana/config
+  source "$(SOURCE)/Config.in"
+endef
 
 define Package/hostapd-mana/Default
   SECTION:=net
