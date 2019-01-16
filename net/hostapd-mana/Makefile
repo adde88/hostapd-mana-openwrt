@@ -9,15 +9,15 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
 PKG_VERSION:=2.6.5
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
-PKG_SOURCE_VERSION:=a07c7ba0ac646d06d2a74795833fd83e57c129ab
+PKG_SOURCE_VERSION:=1163c8a12f84cdbe8e073d90720e03da4757caeb
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_HASH:=57250d23c10bb2fb81c559379b81e1b3f0a85adcfcfd10d34f31cb93bd0faac5
+PKG_HASH:=d93179b3a9a0c1af2e3c0a8a756b381678afab354004a89f0e5aabdfcac34961
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>
 
@@ -136,7 +136,7 @@ TARGET_CPPFLAGS := \
 	-D_GNU_SOURCE \
 	$(if $(CONFIG_WPA_MSG_MIN_PRIORITY),-DCONFIG_MSG_MIN_PRIORITY=$(CONFIG_WPA_MSG_MIN_PRIORITY))
 
-TARGET_CFLAGS += -ffunction-sections -fdata-sections
+TARGET_CFLAGS += -ffunction-sections -fdata-sections -Wno-format-truncation -Wno-unused-result
 TARGET_LDFLAGS += -Wl,--gc-sections
 
 ifeq ($(findstring supplicant,$(BUILD_VARIANT)),)
