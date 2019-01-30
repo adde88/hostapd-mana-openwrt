@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
 PKG_VERSION:=2.6.5
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
@@ -92,10 +92,21 @@ define Package/hostapd-mana/config
   source "$(SOURCE)/Config.in"
 endef
 
+define Package/hostapd-mana-light/config
+  source "$(SOURCE)/Config.in"
+endef
+
 define Package/hostapd-mana/Default
   SECTION:=net
   CATEGORY:=Network
   TITLE:=IEEE 802.1x Authenticator with support for the MANA and Karma attacks.
+  DEPENDS:=$(DRV_DEPENDS) +libubus
+endef
+
+define Package/hostapd-mana-light/Default
+  SECTION:=net
+  CATEGORY:=Network
+  TITLE:=IEEE 802.1x Authenticator with support for the MANA and Karma attacks. (ONLY MANA BINARIES)
   DEPENDS:=$(DRV_DEPENDS) +libubus
 endef
 
@@ -105,8 +116,18 @@ $(call Package/hostapd-mana/Default)
   VARIANT:=full
 endef
 
+define Package/hostapd-mana-light
+$(call Package/hostapd-mana-light/Default)
+  TITLE+= (full)
+  VARIANT:=full
+endef
+
 define Package/hostapd-mana/description
- This package contains a full featured IEEE 802.1x/WPA/EAP/RADIUS Authenticator with support for the MANA/KARMA attack.
+ This package contains hostapd with support for the MANA/KARMA attacks.
+endef
+
+define Package/hostapd-mana-light/description
+  This package contains a hostapd with support for the MANA/KARMA attacks.
 endef
 
 ifneq ($(wildcard $(PKG_BUILD_DIR)/.config_*),$(subst .configured_,.config_,$(STAMP_CONFIGURED)))
@@ -172,7 +193,40 @@ define Build/Compile
 	$(Build/Compile/full)
 endef
 
+define Package/hostapd-mana/postinst
+#!/bin/sh
+# Let's download Sycophant (dirty fix.. Will fix this properly in a later release)
+mkdir -p /tmp/mana_dependencies/
+echo -e '\nDownloading Sycopant binary...\n\n'
+if [ -d /sd ]; then
+  wget https://github.com/adde88/hostapd-mana-openwrt/raw/master/bin/ar71xx/packages/base/wpa_sycophant -O /sd/usr/sbin/wpa_sycophant
+else
+  wget https://github.com/adde88/hostapd-mana-openwrt/raw/master/bin/ar71xx/packages/base/wpa_sycophant -O /usr/sbin/wpa_sycophant
+fi
+chmod +x /usr/sbin/wpa_sycophant
+# We need to install some python dependencies...
+echo -e '\nDownloading python-related dependencies...\n'
+sleep 1
+wget -i /etc/mana-toolkit/dependencies.txt -P /tmp/mana_dependencies/ --progress=bar:force:noscroll
+#
+# Let's pre-compile python-files and libraries.
+echo -e '\nPre-compiling python files and libraries...\nThis can take a little while, please be patient...\n'
+python -m compileall;
+python -m compileall $${1}/usr/share/mana-toolkit/;
+#
+echo -e '\nFinished installing hostapd-mana. However, you will not be able to use any python-related tools before installing their dependencies...'
+echo -e '\nThey should already be downloaded.\nTo install them enter the following command: "install-mana-depends"'
+echo -e '\n\n -Zylla   <adde88@gmail.com> '
+endef
+
 define Install/hostapd-mana
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_DIR) $(1)/etc/mana-toolkit/
+	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/
+	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/cert/
+endef
+
+define Install/hostapd-mana-light
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_DIR) $(1)/etc/mana-toolkit/
 	$(INSTALL_DIR) $(1)/usr/share/mana-toolkit/
@@ -192,4 +246,14 @@ define Package/hostapd-mana/install
 	$(INSTALL_BIN)	$(PKG_BUILD_DIR)/files/install-mana-depends	$(1)/usr/sbin/install-mana-depends
 endef
 
+define Package/hostapd-mana-light/install
+	$(call Install/hostapd-mana-light,$(1))
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd                $(1)/usr/sbin/hostapd-mana
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/hostapd/hostapd_cli            $(1)/usr/sbin/mana_cli
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/files/wpa_sycophant.sh         $(1)/usr/sbin/wpa_sycophant.sh
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/conf/*                   $(1)/etc/mana-toolkit/
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/files/cert/*                   $(1)/usr/share/mana-toolkit/cert/
+endef
+
 $(eval $(call BuildPackage,hostapd-mana))
+$(eval $(call BuildPackage,hostapd-mana-light))
