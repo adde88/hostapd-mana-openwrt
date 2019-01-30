@@ -1,21 +1,22 @@
-hostapd-mana 2.6 @ Pineapple NANO + TETRA / OpenWRT
+hostapd-mana 2.6.5
 ===================================
-hostapd-mana patches by Dominic White (singe) & Ian de Villiers @ sensepost (research@sensepost.com)  
-ported to OpenWRT by: Andreas Nilsen @adde88
+hostapd with MANA patches by Dominic White (singe) & Ian de Villiers @ sensepost (research@sensepost.com)  
+Ported to OpenWRT by: Andreas Nilsen @adde88
 
-Last Update: 06.01.2018
+Last Update: 30.01.2019
 -----------------------
-Updated to work properly with the latest FW updates to the WiFi Pineapples!
-Type this to install mana-toolkit for the Pineapple:  
+Updated to follow the upstream changes from Sensepost.  
+Added a 'light' version, that ONLY contains hostapd-mana binaries.  
+Also added IPK's and wpa_sycuphant binaries for both Chaos Calmer and snapshot OpenWRT. (TARGET=PINEAPPLE-NANO)  
+Type this to install mana-toolkit on the WiFi Pineapple NANO/TETRA:  
 ```bash
 wget -qO- https://raw.githubusercontent.com/adde88/hostapd-mana/master/INSTALL.sh | bash -s -- -v -v
 ```
   
 Also:  
-New improved launch script!  
-Simply type 'launch-mana' (without the quotes) to start the attack.  
-More to come... :)   
-
+Improved launch wrapper!  
+Simply type 'launch-mana' (without the quotes) to start the MANA attack.  
+More coming...  
 Yours truly, Andreas Nilsen. - @adde88
 
 
@@ -41,16 +42,17 @@ It contains:
 Dependencies
 ------------
 Dependencies: libubus, tinyproxy, stunnel, ip, python, openssl   
-(You should run: "opkg update" before installing.)
+(You should run: "opkg update" before installing any IPK's.)
 
 
-Installation
+Manual Installation
 ------------
-Install both IPK files located within the folder ./bin/ar71xx/packages/base/  
-hostapd-mana_2.6-5_ar71xx.ipk  
+Run 'opkg update' first.
+Transfer and install the following IPK files located within the sub-folder ./bin/ar71xx/packages/base/ to your device:  
+hostapd-mana_2.6.5-4_ar71xx.ipk  
 asleap_2.2-1_ar71xx.ipk
 
-Everything will be installed to your usual folders:  
+Will be installing to the usual folders:  
 /usr/share/mana-toolkit/  
 /etc/mana-toolkit/  
 /var/lib/mana-toolkit/
