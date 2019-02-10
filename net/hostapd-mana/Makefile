@@ -9,15 +9,15 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
 PKG_VERSION:=2.6.5
-PKG_RELEASE:=4
+PKG_RELEASE:=5
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/adde88/hostapd-mana.git
-PKG_SOURCE_VERSION:=1163c8a12f84cdbe8e073d90720e03da4757caeb
+PKG_SOURCE_VERSION:=7bd8e2c5863ba94978c4cdc592b2d50e194bf39d
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_HASH:=d93179b3a9a0c1af2e3c0a8a756b381678afab354004a89f0e5aabdfcac34961
+PKG_HASH:=6b19f444d2fc1646721f225e8a740b135b2f703cd84a00acfd35d8fdee80011a
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>
 
@@ -32,14 +32,32 @@ PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_kmod-hostap \
 	CONFIG_DRIVER_WEXT_SUPPORT \
 	CONFIG_DRIVER_11N_SUPPORT \
-	CONFIG_TAXONOMY
+	CONFIG_DRIVER_11AC_SUPPORT \
+	CONFIG_TAXONOMY_SUPPORT
 
 LOCAL_TYPE=$(strip \
 		$(if $(findstring wpad,$(BUILD_VARIANT)),wpad, \
 		$(if $(findstring supplicant,$(BUILD_VARIANT)),supplicant, \
 		hostapd \
-	)))
-LOCAL_VARIANT=$(patsubst wpad-%,%,$(patsubst supplicant-%,%,$(BUILD_VARIANT)))
+		)))
+
+LOCAL_AND_LIB_VARIANT=$(patsubst hostapd-%,%,\
+			$(patsubst wpad-%,%,\
+			$(patsubst supplicant-%,%,\
+			$(BUILD_VARIANT)\
+			)))
+
+LOCAL_VARIANT=$(patsubst %-internal,%,\
+		$(patsubst %-openssl,%,\
+		$(patsubst %-wolfssl,%,\
+		$(LOCAL_AND_LIB_VARIANT)\
+		)))
+
+SSL_VARIANT=$(strip \
+		$(if $(findstring openssl,$(LOCAL_AND_LIB_VARIANT)),openssl,\
+		$(if $(findstring wolfssl,$(LOCAL_AND_LIB_VARIANT)),wolfssl,\
+		internal\
+		)))
 
 ifeq ($(LOCAL_TYPE),supplicant)
   ifeq ($(LOCAL_VARIANT),full)
@@ -57,36 +75,54 @@ ifneq ($(CONFIG_DRIVER_11N_SUPPORT),)
   HOSTAPD_IEEE80211N:=y
 endif
 
+ifneq ($(CONFIG_DRIVER_11AC_SUPPORT),)
+  HOSTAPD_IEEE80211AC:=y
+endif
+
+ifneq ($(CONFIG_TAXONOMY),)
+  CONFIG_TAXONOMY:=y
+endif
+
 DRIVER_MAKEOPTS= \
 	CONFIG_ACS=$(CONFIG_PACKAGE_kmod-cfg80211) \
 	CONFIG_DRIVER_NL80211=$(CONFIG_PACKAGE_kmod-cfg80211) \
-	CONFIG_DRIVER_HOSTAP=$(CONFIG_PACKAGE_kmod-hostap) \
 	CONFIG_IEEE80211N=$(HOSTAPD_IEEE80211N) \
-	CONFIG_IEEE80211W=$(CONFIG_DRIVER_11W_SUPPORT) \
+	CONFIG_IEEE80211AC=$(HOSTAPD_IEEE80211AC) \
 	CONFIG_DRIVER_WEXT=$(CONFIG_DRIVER_WEXT_SUPPORT) \
 	CONFIG_TAXONOMY=$(CONFIG_TAXONOMY) \
 	$(if $(CONFIG_WPA_RFKILL_SUPPORT),NEED_RFKILL=y) \
 
+space :=
+space +=
+
 ifneq ($(LOCAL_TYPE),hostapd)
-  ifdef CONFIG_WPA_SUPPLICANT_OPENSSL
-    ifeq ($(LOCAL_VARIANT),full)
-      DRIVER_MAKEOPTS += CONFIG_TLS=openssl
-      TARGET_LDFLAGS += -lcrypto -lssl
-    endif
+  ifeq ($(LOCAL_VARIANT),mesh)
+	ifeq ($(SSL_VARIANT),openssl)
+	  DRIVER_MAKEOPTS += CONFIG_TLS=openssl CONFIG_AP=y CONFIG_SAE=y CONFIG_MESH=y
+	  TARGET_LDFLAGS += -lcrypto -lssl
+	endif
+	ifeq ($(SSL_VARIANT),wolfssl)
+	  DRIVER_MAKEOPTS += CONFIG_TLS=wolfssl CONFIG_WPS_NFC=1 CONFIG_AP=y CONFIG_SAE=y CONFIG_MESH=y
+	  TARGET_LDFLAGS += -lwolfssl
+  	endif
   endif
+
   ifdef CONFIG_WPA_SUPPLICANT_NO_TIMESTAMP_CHECK
     TARGET_CFLAGS += -DNO_TIMESTAMP_CHECK
+  endif
+  ifdef CONFIG_WPA_RFKILL_SUPPORT
+    DRIVER_MAKEOPTS += NEED_RFKILL=y
   endif
   DRIVER_MAKEOPTS += \
 	CONFIG_DRIVER_ROBOSWITCH=$(CONFIG_PACKAGE_kmod-switch)
 endif
 
-ifdef CONFIG_USE_EGLIBC
+ifdef CONFIG_USE_GLIBC
   TARGET_LDFLAGS += -lrt
   TARGET_LDFLAGS_C += -lrt
 endif
 
-DRV_DEPENDS:=+PACKAGE_kmod-cfg80211:libnl-tiny @(!TARGET_avr32||BROKEN)
+DRV_DEPENDS:=+PACKAGE_kmod-cfg80211:libnl-tiny
 
 define Package/hostapd-mana/config
   source "$(SOURCE)/Config.in"
@@ -100,14 +136,14 @@ define Package/hostapd-mana/Default
   SECTION:=net
   CATEGORY:=Network
   TITLE:=IEEE 802.1x Authenticator with support for the MANA and Karma attacks.
-  DEPENDS:=$(DRV_DEPENDS) +libubus
+  DEPENDS:=$(DRV_DEPENDS) +libubus +libopenssl
 endef
 
 define Package/hostapd-mana-light/Default
   SECTION:=net
   CATEGORY:=Network
   TITLE:=IEEE 802.1x Authenticator with support for the MANA and Karma attacks. (ONLY MANA BINARIES)
-  DEPENDS:=$(DRV_DEPENDS) +libubus
+  DEPENDS:=$(DRV_DEPENDS) +libubus +libopenssl
 endef
 
 define Package/hostapd-mana
@@ -157,8 +193,8 @@ TARGET_CPPFLAGS := \
 	-D_GNU_SOURCE \
 	$(if $(CONFIG_WPA_MSG_MIN_PRIORITY),-DCONFIG_MSG_MIN_PRIORITY=$(CONFIG_WPA_MSG_MIN_PRIORITY))
 
-TARGET_CFLAGS += -ffunction-sections -fdata-sections -Wno-format-truncation -Wno-unused-result
-TARGET_LDFLAGS += -Wl,--gc-sections
+TARGET_CFLAGS += -ffunction-sections -fdata-sections -flto
+TARGET_LDFLAGS += -Wl,--gc-sections -flto=jobserver -fuse-linker-plugin -lubox -lubus
 
 ifeq ($(findstring supplicant,$(BUILD_VARIANT)),)
   TARGET_LDFLAGS += -lubox -lubus
