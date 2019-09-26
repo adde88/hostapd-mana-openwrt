@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2014 OpenWrt.org
+# Copyright (C) 2006-2019 Andreas Nilsen <adde88@gmail.com>
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,33 +9,31 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=asleap
 PKG_VERSION:=2.2
-PKG_RELEASE:=1
+PKG_RELEASE:=4
 
-PKG_SOURCE:=asleap-$(PKG_VERSION).tgz
-PKG_SOURCE_URL:=http://www.willhackforsushi.com/code/asleap/2.2/
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
-PKG_MD5SUM:=a1d06729fb2addcc5b09bfc14f9b3173
-PKG_CAT:=zcat
-
-PKG_BUILD_DIR:=$(BUILD_DIR)/asleap-$(PKG_VERSION)
-
-PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com.com>, Original asleap package: Josh <jwright@hasborg.com>
-
-PKG_BUILD_PARALLEL:=1
+PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com>
 
 include $(INCLUDE_DIR)/package.mk
 
 define Package/asleap
 	SECTION:=base
 	CATEGORY:=Network
-	TITLE:=Generic MS-CHAPv2 cracking tool, with pcap support.
-	URL:=http://www.willhackforsushi.com
+	TITLE:=Actively recover LEAP/PPTP passwords
+	URL:=https://tools.kali.org/wireless-attacks/asleap
 	DEPENDS:=+libpthread +libopenssl +libpcap
 endef
 
 define Package/asleap/description
-	A generic MS-CHAPv2 cracking tool.
-	Can be applied anytime you have a MS-CHAPv2 packet capture available.
+  LEAP utilizes a modified MS-CHAPv2 challenge/response in order to
+  authenticate users on a wireless network.
+endef
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(CP) -rf ./src/* $(PKG_BUILD_DIR)/
 endef
 
 define Build/RunMake
