@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2019 Andreas Nilsen <adde88@gmail.com> https://github.com/adde88
+# Copyright (C) 2021 Andreas Nilsen <adde88@gmail.com> https://github.com/adde88
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -9,43 +9,44 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=hostapd-mana
 PKG_VERSION:=2.6.5
-PKG_RELEASE:=18
+PKG_RELEASE:=25
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=Andreas Nilsen <adde88@gmail.com>
-
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=COPYING
 
 PKG_BUILD_PARALLEL:=1
+PKG_ASLR_PIE_REGULAR:=1
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_kmod-ath9k \
 	CONFIG_PACKAGE_kmod-cfg80211 \
 	CONFIG_PACKAGE_hostapd \
 	CONFIG_PACKAGE_hostapd-mini \
-	CONFIG_PACKAGE_kmod-hostap \
-	CONFIG_DRIVER_WEXT_SUPPORT \
-	CONFIG_DRIVER_11N_SUPPORT \
-	CONFIG_DRIVER_11AC_SUPPORT \
-	CONFIG_DRIVER_TAXONOMY_SUPPORT
+	CONFIG_MANA_RFKILL_SUPPORT \
+	CONFIG_MANA_MSG_MIN_PRIORITY \
+	CONFIG_MANA_DRIVER_WEXT_SUPPORT \
+	CONFIG_MANA_DRIVER_11N_SUPPORT \
+	CONFIG_MANA_DRIVER_11AC_SUPPORT \
+	CONFIG_MANA_DRIVER_TAXONOMY_SUPPORT
 
 include $(INCLUDE_DIR)/package.mk
 
-STAMP_CONFIGURED:=$(STAMP_CONFIGURED)
+STAMP_CONFIGURED:=$(STAMP_CONFIGURED)_$(CONFIG_MANA_MSG_MIN_PRIORITY)
 
-ifneq ($(CONFIG_DRIVER_11N_SUPPORT),)
+ifneq ($(CONFIG_MANA_DRIVER_11N_SUPPORT),)
   HOSTAPD_IEEE80211N:=y
 endif
 
-ifneq ($(CONFIG_DRIVER_11AC_SUPPORT),)
+ifneq ($(CONFIG_MANA_DRIVER_11AC_SUPPORT),)
   HOSTAPD_IEEE80211AC:=y
 endif
 
-ifneq ($(CONFIG_DRIVER_TAXONOMY),)
-  CONFIG_DRIVER_TAXONOMY:=y
+ifneq ($(CONFIG_MANA_DRIVER_TAXONOMY_SUPPORT),)
+  CONFIG_MANA_DRIVER_TAXONOMY_SUPPORT:=y
 endif
 
 DRIVER_MAKEOPTS= \
@@ -53,19 +54,18 @@ DRIVER_MAKEOPTS= \
 	CONFIG_DRIVER_NL80211=$(CONFIG_PACKAGE_kmod-cfg80211) \
 	CONFIG_IEEE80211N=$(HOSTAPD_IEEE80211N) \
 	CONFIG_IEEE80211AC=$(HOSTAPD_IEEE80211AC) \
-	CONFIG_IEEE80211W=$(CONFIG_DRIVER_11W_SUPPORT) \
-	CONFIG_DRIVER_WEXT=$(CONFIG_DRIVER_WEXT_SUPPORT) \
-	CONFIG_DRIVER_TAXONOMY=$(CONFIG_DRIVER_TAXONOMY) \
+	CONFIG_IEEE80211W=$(CONFIG_MANA_DRIVER_11W_SUPPORT) \
+	CONFIG_DRIVER_WEXT=$(CONFIG_MANA_DRIVER_WEXT_SUPPORT) \
+	CONFIG_TAXONOMY=$(CONFIG_MANA_DRIVER_TAXONOMY_SUPPORT) \
 
-space :=
-space +=
+ifdef CONFIG_MANA_RFKILL_SUPPORT
+  DRIVER_MAKEOPTS += NEED_RFKILL=y
+endif
 
 ifdef CONFIG_USE_GLIBC
   TARGET_LDFLAGS += -lrt
   TARGET_LDFLAGS_C += -lrt
 endif
-
-DRV_DEPENDS:=+PACKAGE_kmod-cfg80211:libnl
 
 define Package/hostapd-mana/config
   source "$(SOURCE)/Config.in"
@@ -74,10 +74,10 @@ endef
 define Package/hostapd-mana
   SECTION:=net
   CATEGORY:=Network
+  SUBMENU:=WirelessAPD
   TITLE:=Hostapd with support for the MANA and Karma attacks.
-  DEPENDS:=$(DRV_DEPENDS) +libubus +libopenssl +libpthread +libnl
+  DEPENDS:=+libubus +libnl +libnl-genl +libnl-route
   URL:=https://github.com/sensepost/hostapd-mana
-  TITLE:=hostapd-mana
 endef
 
 define Package/hostapd-mana/description
@@ -110,11 +110,12 @@ TARGET_CPPFLAGS := \
 	-I$(STAGING_DIR)/usr/include/libnl3 \
 	-I$(PKG_BUILD_DIR)/src/crypto \
 	$(TARGET_CPPFLAGS) \
-	-DCONFIG_LIBNL30 \
+	-DCONFIG_LIBNL20 \
 	-D_GNU_SOURCE \
+	$(if $(CONFIG_MANA_MSG_MIN_PRIORITY),-DCONFIG_MSG_MIN_PRIORITY=$(CONFIG_MANA_MSG_MIN_PRIORITY))
 
 TARGET_CFLAGS += -ffunction-sections -fdata-sections -flto
-TARGET_LDFLAGS += -Wl,--gc-sections -flto=jobserver -fuse-linker-plugin -lubox -lubus -lm -lnl-3 -lnl-genl-3 -lnl-route-3 -ldl
+TARGET_LDFLAGS += -Wl,--gc-sections -flto=jobserver -fuse-linker-plugin -lubox -lubus -lm -lnl-3 -lnl-genl-3 -lnl-route-3
 
 define Build/RunMake
         CFLAGS="$(TARGET_CPPFLAGS) $(TARGET_CFLAGS)" \
@@ -136,8 +137,7 @@ define Build/Compile/hostapd-mana
 endef
 
 define Build/Compile
-	echo "LOCAL TYPE: $(LOCAL_TYPE)"
-	echo "BUILD VARIANT: $(BUILD_VARIANT)"
+	echo "Compiling $(PKG_NAME)-$(PKG_VERSION)"
 	$(Build/Compile/hostapd-mana)
 	$(Build/Compile/full)
 endef

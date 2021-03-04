@@ -1,0 +1,3 @@
+[submodule "net/hostapd-mana/src"]
+	path = net/hostapd-mana/src
+	url = git@github.com:adde88/hostapd-mana
