@@ -30,10 +30,24 @@ config MANA_DRIVER_11AC_SUPPORT
         bool "Enable 802.11AC support"
         default y
 
-config MANA_DRIVER_11W_SUPPORT
-        bool "Enable 802.11W (Management Frame Protection)"
+config MANA_DRIVER_11AX_SUPPORT
+        bool "Enable 802.11AX support"
         default y
+
+#config MANA_DRIVER_11W_SUPPORT
+#        bool "Enable 802.11W (Management Frame Protection)"
+#        default y
 
 config MANA_DRIVER_TAXONOMY_SUPPORT
         bool "Enable Taxonomy support for hostapd-mana"
         default y
+
+config MANA_WPA_ENABLE_WEP
+        bool "Enable support for unsecure and obsolete WEP"
+	default y
+        help
+          Wired equivalent privacy (WEP) is an obsolete cryptographic data
+          confidentiality algorithm that is not considered secure. It should not be used
+          for anything anymore. The functionality needed to use WEP is available in the
+          current hostapd release under this optional build parameter and completely
+          removed in a future release.
